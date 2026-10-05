@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cao Thế Tiến - Portfolio</title>
+    <!-- Font chuẩn điện ảnh kỳ ảo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fire-core: rgba(255, 255, 255, 0.9);
+            --fire-mid: rgba(255, 180, 0, 0.9);
+            --fire-edge: rgba(255, 50, 0, 0.8);
+            --fire-smoke: rgba(100, 10, 0, 0.3);
+            --text-dark: #2a1608;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: 'Lora', serif;
+        }
+
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            /* Phông nền Cinematic (Mây đen u ám) */
+            background: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+        }
+        
+        /* Phủ một lớp bóng tối lên background */
+        .scroll-container::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .scene {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Trang giấy da (Parchment) */
+        .content {
+            background: #dcd0b8 url('https://www.transparenttextures.com/patterns/old-wall.png');
+            color: var(--text-dark);
+            padding: 60px 70px;
+            border-radius: 6px;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.95), 
+                inset 0 0 60px rgba(80,30,0,0.5),
+                0 0 20px rgba(255, 80, 0, 0.15);
+            width: 80%;
+            max-width: 850px;
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(139, 69, 19, 0.4);
+            
+            /* Ban đầu ẩn đi */
+            opacity: 0;
+            /* Mask để tạo hiệu ứng lửa liếm qua làm lộ chữ */
+            -webkit-mask-image: linear-gradient(to right, black 45%, transparent 55%);
+            mask-image: linear-gradient(to right, black 45%, transparent 55%);
+            -webkit-mask-size: 230% 100%;
+            mask-size: 230% 100%;
+            -webkit-mask-position: 100% 0;
+            mask-position: 100% 0;
+        }
+
+        .scene.active .content {
+            animation: revealScorched 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 1.4s;
+        }
+
+        /* Hiệu ứng chữ vừa bị đốt: Sáng rực lên rồi nguội thành màu mực đậm */
+        @keyframes revealScorched {
+            0% { 
+                opacity: 1; 
+                -webkit-mask-position: 100% 0; 
+                filter: brightness(1.8) contrast(1.5) drop-shadow(0 0 10px rgba(255, 100, 0, 0.8)); 
+            }
+            60% { 
+                filter: brightness(1.2) contrast(1.1) drop-shadow(0 0 4px rgba(255, 50, 0, 0.3)); 
+            }
+            100% { 
+                opacity: 1; 
+                -webkit-mask-position: 0 0; 
+                filter: brightness(1) contrast(1) drop-shadow(0 0 0 transparent); 
+            }
+        }
+
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            color: #3b1d06;
+            margin-top: 0;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 3rem;
+            letter-spacing: 4px;
+            border-bottom: 2px solid #733710;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            border-bottom: 1px solid #8b4513;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+
+        h3 { font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 10px; }
+        p, li { font-size: 1.15rem; line-height: 1.8; margin-bottom: 15px; }
+        ul { padding-left: 25px; }
+        li { margin-bottom: 12px; }
+
+        /* Khung chứa rồng & lửa */
+        .dragon-wrapper {
+            position: absolute;
+            top: 50%;
+            left: -500px;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        /* Hình bóng rồng Cinematic (Dùng SVG thực tế) */
+        .dragon {
+            width: 300px;
+            height: 300px;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/d/df/Dragon_silhouette.svg') no-repeat center center;
+            background-size: contain;
+            /* Đổi thành màu đen kịt, lật ngang và hơi nghiêng xuống */
+            filter: brightness(0) drop-shadow(20px 30px 15px rgba(0,0,0,0.9));
+            transform: scaleX(-1) rotate(-15deg);
+        }
+
+        /* Luồng lửa phun */
+        .fire-blast {
+            position: absolute;
+            top: 60%; /* Căn ngay miệng rồng */
+            left: 260px; 
+            width: 0;
+            height: 140px;
+            background: linear-gradient(to right, 
+                var(--fire-core) 0%, 
+                var(--fire-mid) 15%, 
+                var(--fire-edge) 50%, 
+                var(--fire-smoke) 85%, 
+                transparent 100%);
+            transform: translateY(-50%);
+            transform-origin: left center;
+            border-radius: 50% 0 0 50%;
+            filter: blur(8px) drop-shadow(0 0 40px rgba(255, 100, 0, 1));
+            opacity: 0;
+            mix-blend-mode: screen; /* Blend mode tạo độ sáng chói thật */
+            pointer-events: none;
+        }
+
+        /* Animation cho rồng bay vào */
+        .scene.active .dragon-wrapper {
+            animation: 
+                flyInCinematic 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
+                hoverCinematic 4s ease-in-out infinite 1.4s;
+        }
+
+        @keyframes flyInCinematic {
+            0% { left: -500px; transform: translateY(-20%) rotate(15deg) scale(0.9); opacity: 0; }
+            40% { opacity: 1; }
+            100% { left: -60px; transform: translateY(-50%) rotate(0deg) scale(1); }
+        }
+
+        @keyframes hoverCinematic {
+            0%, 100% { transform: translateY(-50%); }
+            50% { transform: translateY(-52%); }
+        }
+
+        /* Animation cho luồng lửa */
+        .scene.active .fire-blast {
+            animation: fieryBreath 1.8s cubic-bezier(0.4, 0, 0.1, 1) forwards;
+            animation-delay: 1.2s; /* Phun ngay khi vừa đáp tới */
+        }
+
+        @keyframes fieryBreath {
+            0% { width: 0; opacity: 0; }
+            10% { opacity: 1; }
+            50% { width: 140vw; opacity: 0.95; }
+            100% { width: 140vw; opacity: 0; }
+        }
+
+        /* Nút cuộn */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            animation: bounce 2.5s infinite;
+            z-index: 20;
+            pointer-events: none;
+            text-shadow: 0 2px 10px black;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-12px) translateX(-50%); }
+            60% { transform: translateY(-6px) translateX(-50%); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-indicator">Cuộn xuống ↓</div>
+    <div class="scroll-container">
+        
+        <!-- Màn 1: Giới thiệu -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h1>CAO THẾ TIẾN</h1>
+                <p>Hà Nội, Việt Nam | 0972699212 | <a href="mailto:thetien212@email.com" style="color: var(--text-dark); font-weight: bold;">thetien212@email.com</a></p>
+                <h2>MỤC TIÊU NGHỀ NGHIỆP</h2>
+                <p>Được làm việc trong môi trường ngân hàng chuyên nghiệp để phát triển bản thân và tích lũy kinh nghiệm trong ngành và có mong muốn được trải nghiệm thực tế nghiệp vụ, đóng góp cho đội ngũ với tinh thần chủ động, ham học hỏi.</p>
+            </div>
+        </section>
+
+        <!-- Màn 2: Học vấn -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>HỌC VẤN</h2>
+                <h3>Trường Đại Học Ngoại Thương Hà Nội</h3>
+                <p>Sinh viên năm 2 ngành Tài chính – ngân hàng | GPA: 3.69/4.0 <span style="float: right; font-weight: 600;">2025 – 2029 (dự kiến)</span></p>
+                <p><strong>Môn học liên quan:</strong> Nguyên lý tài chính (4.0), Nguyên lý kế toán (4.0), Kinh tế vĩ mô (4.0), Kinh tế vi mô (4.0)</p>
+            </div>
+        </section>
+
+        <!-- Màn 3: Dự án 1 -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>DỰ ÁN</h2>
+                <h3>LongInvest – Ứng dụng quản lý tài chính cá nhân</h3>
+                <p><em>Vai trò: Nhóm trưởng</em></p>
+                <ul>
+                    <li>Dẫn dắt nhóm 5 thành viên, xây dựng timeline dự án và điều phối tiến độ qua các giai đoạn nghiên cứu, thiết kế, thử nghiệm sản phẩm từ đó phát triển mô hình kinh doanh (Business Model Canvas) cho giải pháp đầu tư vi mô thay thế các kênh chứng khoán truyền thống.</li>
+                    <li>Tổ chức khảo sát và thu thập dữ liệu về thói quen chi tiêu, đầu tư của người tiêu dùng, từ đó xây dựng chân dung khách hàng mục tiêu đồng thời lên kịch bản video quảng bá sản phẩm và hoàn thiện sản phẩm cuối cùng.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Màn 4: Dự án 2 -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>DỰ ÁN</h2>
+                <h3>Ảnh hưởng của chính sách tài khóa đến phục hồi kinh tế Việt Nam (2020–2024)</h3>
+                <p><em>Tiểu luận nhóm môn Kinh tế vĩ mô</em></p>
+                <ul>
+                    <li>Tổng hợp và xử lý số liệu từ các báo cáo thống kê chính thức của nhà nước để phân tích biến động các chỉ số kinh tế cốt lõi (tăng trưởng GDP, lạm phát CPI, tỷ lệ nợ công) giai đoạn 2020–2024.</li>
+                    <li>Đánh giá tác động thực tiễn của chính sách tài khóa ngược chu kỳ đến quá trình phục hồi kinh tế Việt Nam thời kỳ đại dịch và hậu đại dịch.</li>
+                    <li>Đề xuất giải pháp chính sách dựa trên kết quả phân tích, hoàn thiện báo cáo tiểu luận nhóm.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Màn 5: Dự án 3 -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>DỰ ÁN</h2>
+                <h3>VN30 Stock Market Dashboard</h3>
+                <p><em>Bảng điều khiển dữ liệu chứng khoán VN30</em></p>
+                <ul>
+                    <li>Phát triển ứng dụng web tương tác bằng Python và Streamlit để theo dõi và trực quan hóa dữ liệu biến động thị trường của nhóm cổ phiếu VN30 theo thời gian thực.</li>
+                    <li>Tích hợp API yfinance và thư viện Pandas để tự động hóa quá trình trích xuất, làm sạch dữ liệu tài chính và vẽ biểu đồ chuỗi thời gian (time-series).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Màn 6: Dự án 4 -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>DỰ ÁN</h2>
+                <h3>AI-Powered Weather Assistant</h3>
+                <p><em>Trợ lý thời tiết tích hợp AI</em></p>
+                <ul>
+                    <li>Xây dựng ứng dụng web sử dụng Python và Streamlit nhằm cung cấp thông tin thời tiết theo thời gian thực và đưa ra lời khuyên phù hợp cho người dùng.</li>
+                    <li>Tích hợp API OpenWeatherMap để thu thập dữ liệu thời tiết trực tiếp và API Google Gemini để tự động tạo ra các tư vấn thông minh (GenAI) dựa trên điều kiện thời tiết thực tế.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Màn 7: Dự án 5 -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>DỰ ÁN</h2>
+                <h3>PriceHawk – Ứng dụng theo dõi biến động giá</h3>
+                <ul>
+                    <li>Thiết kế và phát triển giao diện người dùng (UI) cho nền tảng theo dõi giá PriceHawk, tối ưu cấu trúc điều hướng (navigation bar) và bố cục hiển thị sản phẩm trực quan.</li>
+                    <li>Xây dựng bộ nhận diện thương hiệu dự án (logo và linh vật đại bàng), đồng thời chuẩn hóa mã nguồn HTML/CSS và tối ưu hóa tài nguyên hình ảnh để nâng cao trải nghiệm thị giác và hiệu suất trang web.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Màn 8: Kỹ năng -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>KỸ NĂNG & CHỨNG CHỈ</h2>
+                <ul>
+                    <li>Thành thạo các tin học văn phòng Microsoft Office</li>
+                    <li>Ngôn ngữ lập trình: Python</li>
+                    <li>Ngoại ngữ: Tiếng Anh - IELTS 7.0</li>
+                    <li>Tư duy logic tốt, tinh thần trách nhiệm cao</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Màn 9: Liên hệ -->
+        <section class="scene">
+            <div class="dragon-wrapper">
+                <div class="dragon"></div>
+                <div class="fire-blast"></div>
+            </div>
+            <div class="content">
+                <h2>LIÊN HỆ</h2>
+                <p><strong>Điện thoại:</strong> 0972699212</p>
+                <p><strong>Email:</strong> <a href="mailto:thetien212@email.com" style="color: var(--text-dark); font-weight: bold;">thetien212@email.com</a></p>
+                <p><strong>LinkedIn:</strong> <a href="#" style="color: var(--text-dark); font-weight: bold;">The Tien</a></p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const scenes = document.querySelectorAll('.scene');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    } else {
+                        // Remove class when out of view to allow replay
+                        entry.target.classList.remove('active');
+                    }
+                });
+            }, {
+                threshold: 0.5
+            });
+
+            scenes.forEach(scene => observer.observe(scene));
+        });
+    </script>
+</body>
+</html>
